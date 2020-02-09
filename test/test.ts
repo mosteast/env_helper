@@ -1,4 +1,5 @@
 import {
+  env_file_edit,
   env_merge,
   env_replace,
   env_set,
@@ -8,6 +9,7 @@ import {
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
 import { truncate } from 'fs-extra'
+import { Invalid_argument } from '../error/invalid_argument'
 
 const path = resolve(__dirname, '.env.empty.test')
 
@@ -53,4 +55,12 @@ it('reload_env', async () => {
   reload_env(resolve(__dirname, '.env.reload_env.test'))
   expect(process.env.aa).toBe('1')
   expect(process.env.bb).toBe('2')
+})
+
+it('throws with invalid action', async () => {
+  await expect(env_file_edit({
+    // @ts-ignore
+    action: 'invalid_action',
+    path,
+  })).rejects.toThrow(Invalid_argument)
 })

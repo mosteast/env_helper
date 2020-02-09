@@ -71,7 +71,7 @@ export async function env_file_edit(opt: T_opt_edit_env_set | T_opt_edit_env_uns
       r = map
       break
     default:
-      throw new Error(`Invalid action ${action}`)
+      throw new Invalid_argument({ action })
   }
 
   await writeFile(path, env_encode(r))
