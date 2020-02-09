@@ -163,9 +163,9 @@ export function reload_env(path: string) {
 
 /**
  * Reload if not loaded
- * @param path
+ * @param path - Default to pwd() + '.env'
  */
-export function load_env_once(path: string) {
+export function load_env_once(path?: string) {
   if (process.env.____ENV_LOADED____ == '1') {return}
 
   reload_env(path)
