@@ -1,10 +1,9 @@
 {
-  "name": "@mosteast/xxx",
-  "description": "xxx",
+  "name": "@mosteast/env_helper",
+  "description": ".env file helpers",
   "version": "0.1.0",
-  "homepage": "https://github.com/xxx/xxx#readme",
-  "repository": "github:xxx/xxx",
-  "types": "build/xxx.d.ts",
+  "homepage": "https://github.com/mosteast/env_helper#readme",
+  "repository": "github:mosteast/env_helper",
   "main": "build/index.js",
   "type": "build/index.d.ts",
   "files": [
@@ -19,6 +18,8 @@
   "author": "Mosteast team",
   "license": "ISC",
   "dependencies": {
+    "@mosteast/common_eid": "^0.1.3",
+    "@mosteast/e": "^0.1.8",
     "chalk": "^3.0.0",
     "dotenv": "^8.2.0"
   },
