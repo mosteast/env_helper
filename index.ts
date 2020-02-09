@@ -151,7 +151,9 @@ export async function env_replace(map: DotenvParseOutput, opt?: Partial<T_opt_ed
  * Reload env from a .env file
  * @param path
  */
-export function reload_env(path: string) {
+export function reload_env(path?: string) {
+  path = path || resolve(pwd(), '.env')
+
   stat(path, e => {
     if (e) {
       console.warn(`.env file not found: ${path}`)
