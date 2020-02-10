@@ -17,10 +17,12 @@ interface T_opt_edit_env {
   action: A
   /**
    * .env file path
+   * default: working directory
    */
   path?: string
   /**
    * Whether reload process.env by .env file
+   * default: true
    */
   reload?: boolean
 }
@@ -50,7 +52,7 @@ interface T_opt_edit_env_replace extends T_opt_edit_env {
  * Set env variable by editing env file
  */
 export async function env_file_edit(opt: T_opt_edit_env_set | T_opt_edit_env_unset | T_opt_edit_env_merge | T_opt_edit_env_replace) {
-  let { action, key, value, map, path, reload } = { reload: false, ...opt }
+  let { action, key, value, map, path, reload } = { reload: true, ...opt }
 
   path = path || resolve(pwd().toString(), '.env')
   let r: DotenvParseOutput = parse(await readFile(path)) || {}
