@@ -151,10 +151,11 @@ export async function env_replace(map: DotenvParseOutput, opt?: Partial<T_opt_ed
 
 /**
  * Reload env from a .env file
+ * Default path is cwd
  * @param path
  */
 export function reload_env(path?: string) {
-  path = path || resolve(pwd(), '.env')
+  path = path || resolve(pwd().toString(), '.env')
 
   stat(path, e => {
     if (e) {
