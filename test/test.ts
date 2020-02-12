@@ -1,10 +1,10 @@
 import {
-  env_file_edit,
+  modify_env_file,
   env_merge,
   env_replace,
   env_set,
   env_unset,
-  reload_env,
+  reload_env, env_get,
 } from '../index'
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
@@ -23,14 +23,23 @@ afterEach(async () => {await clear()})
 it('env_set', async () => {
   await env_set('a', '1', { path })
   expect(readFileSync(path).toString().trim()).toBe('a=1')
+  expect(await env_get({ key: 'a', path })).toBe('1')
+
   await env_set('b', '2', { path })
   expect(readFileSync(path).toString().trim()).toBe('a=1\nb=2')
+  expect(await env_get({ key: 'a', path })).toBe('1')
+  expect(await env_get({ key: 'b', path })).toBe('2')
+
   await env_set({
     key: 'c',
     value: '3',
     path,
   })
   expect(readFileSync(path).toString().trim()).toBe('a=1\nb=2\nc=3')
+  expect(await env_get({ key: 'a', path })).toBe('1')
+  expect(await env_get({ key: 'b', path })).toBe('2')
+  expect(await env_get({ key: 'c', path })).toBe('3')
+
 })
 
 it('env_unset', async () => {
@@ -64,7 +73,7 @@ it('reload_env', async () => {
 })
 
 it('throws with invalid action', async () => {
-  await expect(env_file_edit({
+  await expect(modify_env_file({
     // @ts-ignore
     action: 'invalid_action',
     path,

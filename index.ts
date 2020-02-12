@@ -13,13 +13,21 @@ enum A {
 
 export const N_edit_env_action = A
 
-export interface T_opt_edit_env {
-  action: A
+export interface T_opt_env_operation {
   /**
    * .env file path
    * default: working directory
    */
   path?: string
+}
+
+export interface T_opt_parse_env extends T_opt_env_operation {}
+
+export interface T_opt_env_get extends T_opt_parse_env {}
+
+export interface T_opt_modify_env extends T_opt_env_operation {
+  action?: A
+
   /**
    * Whether reload process.env by .env file
    * default: true
@@ -27,35 +35,40 @@ export interface T_opt_edit_env {
   reload?: boolean
 }
 
-export interface T_opt_edit_env_set extends T_opt_edit_env {
-  action: A.set
-  key: string
-  value: string
+export interface T_opt_edit_env_set extends T_opt_modify_env {
+  key?: string
+  value?: string
 }
 
-export interface T_opt_edit_env_unset extends T_opt_edit_env {
-  action: A.unset
-  key: string
+export interface T_opt_edit_env_unset extends T_opt_modify_env {
+  key?: string
 }
 
-export interface T_opt_edit_env_merge extends T_opt_edit_env {
-  action: A.merge
-  map: DotenvParseOutput,
+export interface T_opt_edit_env_merge extends T_opt_modify_env {
+  map?: DotenvParseOutput,
 }
 
-export interface T_opt_edit_env_replace extends T_opt_edit_env {
-  action: A.replace
-  map: DotenvParseOutput,
+export interface T_opt_edit_env_replace extends T_opt_modify_env {
+  map?: DotenvParseOutput,
+}
+
+/**
+ * File: 'a=1\nb=2' ==> {a: '1', b: '2'}
+ * @param opt
+ */
+export async function parse_env_file(opt?: T_opt_parse_env): Promise<DotenvParseOutput> {
+  const { path } = { path: resolve(pwd().toString(), '.env'), ...opt }
+  return parse(await readFile(path)) || {}
 }
 
 /**
  * Set env variable by editing env file
  */
-export async function env_file_edit(opt: T_opt_edit_env_set | T_opt_edit_env_unset | T_opt_edit_env_merge | T_opt_edit_env_replace) {
-  let { action, key, value, map, path, reload } = { reload: true, ...opt }
+export async function modify_env_file(opt: T_opt_edit_env_set | T_opt_edit_env_unset | T_opt_edit_env_merge | T_opt_edit_env_replace) {
+  let { action, key, value, map, path, reload } =
+        { reload: true, path: resolve(pwd().toString(), '.env'), ...opt }
 
-  path = path || resolve(pwd().toString(), '.env')
-  let r: DotenvParseOutput = parse(await readFile(path)) || {}
+  let r = await parse_env_file(opt)
 
   switch (action) {
     case A.set:
@@ -84,7 +97,7 @@ export async function env_file_edit(opt: T_opt_edit_env_set | T_opt_edit_env_uns
 }
 
 /**
- * {a: 1, b: 2} ==> 'a=1\nb=2'
+ * {a: '1', b: '2'} ==> 'a=1\nb=2'
  * @param map
  */
 export function env_encode(map: DotenvParseOutput): string {
@@ -98,13 +111,31 @@ export function env_encode(map: DotenvParseOutput): string {
 }
 
 /**
- * Set an item in .env file
+ * Get one from .env file (NOT from process.env)
+ * @param key
+ * @param opt
+ */
+export async function env_get(key, opt?: T_opt_env_get): Promise<string>
+export async function env_get(opt?: T_opt_env_get): Promise<string>
+export async function env_get(a, b?): Promise<string> {
+  let opt = { action: A.set, ...b }
+  if (typeof a === 'string') {
+    opt.key = a
+  } else {
+    opt = { ...opt, ...a }
+  }
+
+  return (await parse_env_file(opt))[opt.key]
+}
+
+/**
+ * Set one in .env file
  * @param key
  * @param value
  * @param opt
  */
-export async function env_set(key: string, value: string, opt?: Partial<T_opt_edit_env_set>)
-export async function env_set(opt?: Partial<T_opt_edit_env_set>)
+export async function env_set(key: string, value: string, opt?: T_opt_edit_env_set)
+export async function env_set(opt?: T_opt_edit_env_set)
 export async function env_set(a, b?, c?) {
   let opt: T_opt_edit_env_set = { action: A.set, ...c }
 
@@ -115,16 +146,16 @@ export async function env_set(a, b?, c?) {
     opt = { ...opt, ...a }
   }
 
-  await env_file_edit(opt)
+  await modify_env_file(opt)
 }
 
 /**
- * Unset an item in .env file
+ * Unset one in .env file
  * @param key
  * @param opt
  */
-export async function env_unset(key: string, opt?: Partial<T_opt_edit_env_unset>) {
-  await env_file_edit({
+export async function env_unset(key: string, opt?: T_opt_edit_env_unset) {
+  await modify_env_file({
     action: A.unset,
     key, ...opt,
   })
@@ -135,8 +166,8 @@ export async function env_unset(key: string, opt?: Partial<T_opt_edit_env_unset>
  * @param merge
  * @param opt
  */
-export async function env_merge(map: DotenvParseOutput, opt?: Partial<T_opt_edit_env_merge>) {
-  await env_file_edit({
+export async function env_merge(map: DotenvParseOutput, opt?: T_opt_edit_env_merge) {
+  await modify_env_file({
     action: A.merge,
     map,
     ...opt,
@@ -148,8 +179,8 @@ export async function env_merge(map: DotenvParseOutput, opt?: Partial<T_opt_edit
  * @param map
  * @param opt
  */
-export async function env_replace(map: DotenvParseOutput, opt?: Partial<T_opt_edit_env_replace>) {
-  await env_file_edit({
+export async function env_replace(map: DotenvParseOutput, opt?: T_opt_edit_env_replace) {
+  await modify_env_file({
     action: A.replace,
     map,
     ...opt,
