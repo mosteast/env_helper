@@ -1,7 +1,7 @@
 {
   "name": "@mosteast/env_helper",
   "description": ".env file helpers",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "homepage": "https://github.com/mosteast/env_helper#readme",
   "repository": "github:mosteast/env_helper",
   "main": "build/index.js",
