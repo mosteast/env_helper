@@ -13,7 +13,7 @@ enum A {
 
 export const N_edit_env_action = A
 
-interface T_opt_edit_env {
+export interface T_opt_edit_env {
   action: A
   /**
    * .env file path
@@ -27,23 +27,23 @@ interface T_opt_edit_env {
   reload?: boolean
 }
 
-interface T_opt_edit_env_set extends T_opt_edit_env {
+export interface T_opt_edit_env_set extends T_opt_edit_env {
   action: A.set
   key: string
   value: string
 }
 
-interface T_opt_edit_env_unset extends T_opt_edit_env {
+export interface T_opt_edit_env_unset extends T_opt_edit_env {
   action: A.unset
   key: string
 }
 
-interface T_opt_edit_env_merge extends T_opt_edit_env {
+export interface T_opt_edit_env_merge extends T_opt_edit_env {
   action: A.merge
   map: DotenvParseOutput,
 }
 
-interface T_opt_edit_env_replace extends T_opt_edit_env {
+export interface T_opt_edit_env_replace extends T_opt_edit_env {
   action: A.replace
   map: DotenvParseOutput,
 }
@@ -65,11 +65,11 @@ export async function env_file_edit(opt: T_opt_edit_env_set | T_opt_edit_env_uns
       delete r[key]
       break
     case A.merge:
-      if (!map) {throw new Invalid_argument({ merge: map })}
+      if ( ! map) {throw new Invalid_argument({ merge: map })}
       r = { ...r, ...map }
       break
     case A.replace:
-      if (!map) {throw new Invalid_argument({ merge: map })}
+      if ( ! map) {throw new Invalid_argument({ merge: map })}
       r = map
       break
     default:
