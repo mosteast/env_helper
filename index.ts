@@ -103,12 +103,17 @@ export function env_encode(map: DotenvParseOutput): string {
  * @param value
  * @param opt
  */
-export async function env_set(key: string, value: string, opt?: Partial<T_opt_edit_env_set>) {
-  await env_file_edit({
-    action: A.set,
-    key,
-    value, ...opt,
-  })
+export async function env_set(key: string, value: string, opt?: Partial<T_opt_edit_env_set>)
+export async function env_set(opt?: Partial<T_opt_edit_env_set>)
+export async function env_set(a, b?, c?) {
+  let opt: T_opt_edit_env_set = { action: A.set, ...c }
+
+  if (typeof a === 'string') {
+    opt.key = a
+    opt.value = b
+  }
+
+  await env_file_edit(opt)
 }
 
 /**
