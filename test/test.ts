@@ -25,6 +25,12 @@ it('env_set', async () => {
   expect(readFileSync(path).toString().trim()).toBe('a=1')
   await env_set('b', '2', { path })
   expect(readFileSync(path).toString().trim()).toBe('a=1\nb=2')
+  await env_set({
+    key: 'c',
+    value: '3',
+    path,
+  })
+  expect(readFileSync(path).toString().trim()).toBe('a=1\nb=2\nc=3')
 })
 
 it('env_unset', async () => {

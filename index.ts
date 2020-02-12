@@ -111,6 +111,8 @@ export async function env_set(a, b?, c?) {
   if (typeof a === 'string') {
     opt.key = a
     opt.value = b
+  } else {
+    opt = { ...opt, ...a }
   }
 
   await env_file_edit(opt)
