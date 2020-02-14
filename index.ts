@@ -224,7 +224,7 @@ export function override_env(obj: T_object) {
  * Reload if not loaded
  * @param path - Default to pwd() + '.env'
  */
-export async function load_env_once(path?: string) {
+export function load_env_once(path?: string) {
   if (process.env.____ENV_LOADED____ == '1') {return}
 
   reload_env(path)
