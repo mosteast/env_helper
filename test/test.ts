@@ -67,10 +67,10 @@ it('env_replace', async () => {
 })
 
 it('reload_env', async () => {
-  await reload_env(resolve(__dirname, '.env.reload_env.test'), true)
+  reload_env(resolve(__dirname, '.env.reload_env.test'), true)
   expect(process.env.aa).toBe('1')
   expect(process.env.bb).toBe('2')
-  await reload_env(resolve(__dirname, '.env.reload_env.test2'), true)
+  reload_env(resolve(__dirname, '.env.reload_env.test2'), true)
   expect(process.env.aa).toBe('11')
   expect(process.env.bb).toBe('22')
 })

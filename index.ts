@@ -1,8 +1,10 @@
 import { DotenvParseOutput, parse } from 'dotenv'
+import { readFileSync } from 'fs'
 import { readFile, stat, writeFile } from 'fs-extra'
 import { resolve } from 'path'
 import { pwd } from 'shelljs'
 import { Invalid_argument } from './error/invalid_argument'
+import { T_object } from './type'
 
 enum A {
   set     = 'set',
@@ -92,7 +94,7 @@ export async function modify_env_file(opt: T_opt_edit_env_set | T_opt_edit_env_u
   await writeFile(path, env_encode(r))
 
   if (reload) {
-    await reload_env(path)
+    reload_env(path)
   }
 }
 
@@ -192,9 +194,9 @@ export async function env_replace(map: DotenvParseOutput, opt?: T_opt_edit_env_r
  * Default path is cwd
  * @param path
  */
-export async function reload_env(path?: string, override?: boolean)
-export async function reload_env(path?: string, opt?: T_opt_reload_env)
-export async function reload_env(path?: string, opt?: T_opt_reload_env | boolean) {
+export function reload_env(path?: string, override?: boolean)
+export function reload_env(path?: string, opt?: T_opt_reload_env)
+export function reload_env(path?: string, opt?: T_opt_reload_env | boolean) {
   if (typeof opt === 'boolean') {
     opt = { override: opt }
   }
@@ -203,20 +205,19 @@ export async function reload_env(path?: string, opt?: T_opt_reload_env | boolean
 
   path = path || resolve(pwd().toString(), '.env')
 
-  await stat(path).catch(e => {
-    console.error(e)
-    throw new Invalid_argument({ path }, `.env file not found: ${path}`)
-  })
-
   if (override) {
-    const o = parse(await readFile(path))
-    for (let key in o) {
-      process.env[key] = o[key]
-    }
+    const o = parse(readFileSync(path))
+    override_env(o)
   } else {
     require('dotenv').config({ path })
   }
   process.env.____ENV_LOADED____ = '1'
+}
+
+export function override_env(obj: T_object) {
+  for (let key in obj) {
+    process.env[key] = obj[key]
+  }
 }
 
 /**
@@ -226,9 +227,11 @@ export async function reload_env(path?: string, opt?: T_opt_reload_env | boolean
 export async function load_env_once(path?: string) {
   if (process.env.____ENV_LOADED____ == '1') {return}
 
-  await reload_env(path)
+  reload_env(path)
 }
 
 export interface T_opt_reload_env {
-  override: boolean
+  override?: boolean
 }
+
+export { parse as parse_env }
