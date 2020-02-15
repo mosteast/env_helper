@@ -94,7 +94,7 @@ export async function modify_env_file(opt: T_opt_edit_env_set | T_opt_edit_env_u
   await writeFile(path, env_encode(r))
 
   if (reload) {
-    reload_env(path)
+    reload_env(path, { override: true })
   }
 }
 
