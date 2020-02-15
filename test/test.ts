@@ -4,7 +4,7 @@ import {
   env_replace,
   env_set,
   env_unset,
-  reload_env, env_get,
+  reload_env, env_get, reload_env_sync,
 } from '../index'
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
@@ -67,13 +67,25 @@ it('env_replace', async () => {
 })
 
 it('reload_env', async () => {
-  reload_env(resolve(__dirname, '.env.reload_env.test'), true)
+  await reload_env(resolve(__dirname, '.env.reload_env.test'), true)
   expect(process.env.aa).toBe('1')
   expect(process.env.bb).toBe('2')
-  reload_env(resolve(__dirname, '.env.reload_env.test2'), true)
+  await reload_env(resolve(__dirname, '.env.reload_env.test2'), true)
   expect(process.env.aa).toBe('11')
   expect(process.env.bb).toBe('22')
-  env_set('aa', '111')
+  await env_set('aa', '111', { path })
+  expect(process.env.aa).toBe('11')
+  await env_set('aa', '111', { path, reload: true })
+  expect(process.env.aa).toBe('111')
+})
+
+it('reload_env_sync', async () => {
+  reload_env_sync(resolve(__dirname, '.env.reload_env.test'), true)
+  expect(process.env.aa).toBe('1')
+  expect(process.env.bb).toBe('2')
+  reload_env_sync(resolve(__dirname, '.env.reload_env.test2'), true)
+  expect(process.env.aa).toBe('11')
+  expect(process.env.bb).toBe('22')
 })
 
 it('throws with invalid action', async () => {

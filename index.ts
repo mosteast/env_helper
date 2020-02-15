@@ -1,9 +1,10 @@
 import { DotenvParseOutput, parse } from 'dotenv'
 import { readFileSync } from 'fs'
-import { readFile, stat, writeFile } from 'fs-extra'
+import { pathExists, readFile, writeFile } from 'fs-extra'
 import { resolve } from 'path'
 import { pwd } from 'shelljs'
 import { Invalid_argument } from './error/invalid_argument'
+import { Invalid_path } from './error/invalid_path'
 import { T_object } from './type'
 
 enum A {
@@ -12,8 +13,6 @@ enum A {
   merge   = 'merge',
   replace = 'replace',
 }
-
-export const N_edit_env_action = A
 
 export interface T_opt_env_operation {
   /**
@@ -60,6 +59,9 @@ export interface T_opt_edit_env_replace extends T_opt_modify_env {
  */
 export async function parse_env_file(opt?: T_opt_parse_env): Promise<DotenvParseOutput> {
   const { path } = { path: resolve(pwd().toString(), '.env'), ...opt }
+  if ( ! await pathExists(path)) {
+    throw new Invalid_path(path)
+  }
   return parse(await readFile(path)) || {}
 }
 
@@ -194,9 +196,30 @@ export async function env_replace(map: DotenvParseOutput, opt?: T_opt_edit_env_r
  * Default path is cwd
  * @param path
  */
-export function reload_env(path?: string, override?: boolean): void
-export function reload_env(path?: string, opt?: T_opt_reload_env): void
-export function reload_env(path?: string, opt?: T_opt_reload_env | boolean): void {
+export async function reload_env(path?: string, override?: boolean): Promise<void>
+export async function reload_env(path?: string, opt?: T_opt_reload_env): Promise<void>
+export async function reload_env(path?: string, opt?: T_opt_reload_env | boolean): Promise<void> {
+  if (typeof opt === 'boolean') {
+    opt = { override: opt }
+  }
+
+  const { override } = { override: false, ...opt }
+
+  path = path || resolve(pwd().toString(), '.env')
+
+  if (override) {
+    const o = parse(await readFile(path))
+    override_env(o)
+  } else {
+    require('dotenv').config({ path })
+  }
+
+  set_env_loaded(true)
+}
+
+export function reload_env_sync(path?: string, override?: boolean): void
+export function reload_env_sync(path?: string, opt?: T_opt_reload_env): void
+export function reload_env_sync(path?: string, opt?: T_opt_reload_env | boolean): void {
   if (typeof opt === 'boolean') {
     opt = { override: opt }
   }
@@ -211,7 +234,8 @@ export function reload_env(path?: string, opt?: T_opt_reload_env | boolean): voi
   } else {
     require('dotenv').config({ path })
   }
-  process.env.____ENV_LOADED____ = '1'
+
+  set_env_loaded(true)
 }
 
 export function override_env(obj: T_object) {
@@ -224,10 +248,28 @@ export function override_env(obj: T_object) {
  * Reload if not loaded
  * @param path - Default to pwd() + '.env'
  */
-export function load_env_once(path?: string): void {
-  if (process.env.____ENV_LOADED____ == '1') {return}
+export async function load_env_once(path?: string): Promise<void> {
+  if (env_loaded()) {return}
 
-  reload_env(path)
+  await reload_env(path)
+}
+
+export function load_env_once_sync(path?: string): void {
+  if (env_loaded()) {return}
+
+  reload_env_sync(path)
+}
+
+function env_loaded() {
+  return process.env.____ENV_LOADED____ === '1'
+}
+
+function set_env_loaded(yes: boolean) {
+  if (yes) {
+    process.env.____ENV_LOADED____ = '1'
+  } else {
+    delete process.env.____ENV_LOADED____
+  }
 }
 
 export interface T_opt_reload_env {
