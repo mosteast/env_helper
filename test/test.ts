@@ -73,6 +73,7 @@ it('reload_env', async () => {
   reload_env(resolve(__dirname, '.env.reload_env.test2'), true)
   expect(process.env.aa).toBe('11')
   expect(process.env.bb).toBe('22')
+  env_set('aa', '111')
 })
 
 it('throws with invalid action', async () => {

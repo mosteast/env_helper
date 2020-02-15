@@ -136,9 +136,9 @@ export async function env_get(a, b?): Promise<string> {
  * @param value
  * @param opt
  */
-export async function env_set(key: string, value: string, opt?: T_opt_edit_env_set)
-export async function env_set(opt?: T_opt_edit_env_set)
-export async function env_set(a, b?, c?) {
+export async function env_set(key: string, value: string, opt?: T_opt_edit_env_set): Promise<void>
+export async function env_set(opt?: T_opt_edit_env_set): Promise<void>
+export async function env_set(a, b?, c?): Promise<void> {
   let opt: T_opt_edit_env_set = { action: A.set, ...c }
 
   if (typeof a === 'string') {
@@ -156,7 +156,7 @@ export async function env_set(a, b?, c?) {
  * @param key
  * @param opt
  */
-export async function env_unset(key: string, opt?: T_opt_edit_env_unset) {
+export async function env_unset(key: string, opt?: T_opt_edit_env_unset): Promise<void> {
   await modify_env_file({
     action: A.unset,
     key, ...opt,
@@ -168,7 +168,7 @@ export async function env_unset(key: string, opt?: T_opt_edit_env_unset) {
  * @param merge
  * @param opt
  */
-export async function env_merge(map: DotenvParseOutput, opt?: T_opt_edit_env_merge) {
+export async function env_merge(map: DotenvParseOutput, opt?: T_opt_edit_env_merge): Promise<void> {
   await modify_env_file({
     action: A.merge,
     map,
@@ -181,7 +181,7 @@ export async function env_merge(map: DotenvParseOutput, opt?: T_opt_edit_env_mer
  * @param map
  * @param opt
  */
-export async function env_replace(map: DotenvParseOutput, opt?: T_opt_edit_env_replace) {
+export async function env_replace(map: DotenvParseOutput, opt?: T_opt_edit_env_replace): Promise<void> {
   await modify_env_file({
     action: A.replace,
     map,
@@ -194,9 +194,9 @@ export async function env_replace(map: DotenvParseOutput, opt?: T_opt_edit_env_r
  * Default path is cwd
  * @param path
  */
-export function reload_env(path?: string, override?: boolean)
-export function reload_env(path?: string, opt?: T_opt_reload_env)
-export function reload_env(path?: string, opt?: T_opt_reload_env | boolean) {
+export function reload_env(path?: string, override?: boolean): void
+export function reload_env(path?: string, opt?: T_opt_reload_env): void
+export function reload_env(path?: string, opt?: T_opt_reload_env | boolean): void {
   if (typeof opt === 'boolean') {
     opt = { override: opt }
   }
@@ -224,7 +224,7 @@ export function override_env(obj: T_object) {
  * Reload if not loaded
  * @param path - Default to pwd() + '.env'
  */
-export function load_env_once(path?: string) {
+export function load_env_once(path?: string): void {
   if (process.env.____ENV_LOADED____ == '1') {return}
 
   reload_env(path)
